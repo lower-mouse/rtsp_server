@@ -71,6 +71,7 @@ private:
   Boolean CpbDpbDelaysPresentFlag, pic_struct_present_flag;
   double DeltaTfiDivisor;
   Boolean NeedInsertSei;
+  int FrameCountInVideo;
 };
 
 ////////// H264or5VideoStreamFramer implementation //////////
@@ -224,7 +225,7 @@ H264or5VideoStreamParser ::H264or5VideoStreamParser(int hNumber, H264or5VideoStr
       fHNumber(hNumber), fOutputStartCodeSize(includeStartCodeInOutput ? 4 : 0), fHaveSeenFirstStartCode(False), fHaveSeenFirstByteOfNALUnit(False), fParsedFrameRate(0.0),
       cpb_removal_delay_length_minus1(23), dpb_output_delay_length_minus1(23),
       CpbDpbDelaysPresentFlag(0), pic_struct_present_flag(0),
-      DeltaTfiDivisor(hNumber == 264 ? 2.0 : 1.0),NeedInsertSei(False)
+      DeltaTfiDivisor(hNumber == 264 ? 2.0 : 1.0),NeedInsertSei(False),FrameCountInVideo(0)
 {
 }
 
@@ -1139,7 +1140,15 @@ unsigned H264or5VideoStreamParser::parse()
     
     char msecond[10];
     struct timeval t = getLastSeenPresentationTime();
-    sprintf(msecond, "%03d", t.tv_usec/1000);
+
+    if(t.tv_usec == 1){
+      printf("switch video, last video FrameCount:%d Frame Rate%d\n", FrameCountInVideo, usingSource()->fFrameRate);
+      FrameCountInVideo = 0;
+    }
+
+    unsigned int ms = (FrameCountInVideo * 1000) / usingSource()->fFrameRate;
+    t.tv_sec += ms / 1000;
+    sprintf(msecond, "%03d", ms%1000);
 
     std::string seiInfo = std::to_string(t.tv_sec) + msecond + std::string(",113.960833,22.550000,0.000000,691");
     fprintf(stderr, "%s\n", seiInfo.c_str());
@@ -1406,7 +1415,7 @@ unsigned H264or5VideoStreamParser::parse()
       NeedInsertSei = True;
       usingSource()->fPictureEndMarker = True;
       ++usingSource()->fPictureCount;
-
+      ++FrameCountInVideo;
       // Note that the presentation time for the next NAL unit will be different:
       struct timeval &nextPT = usingSource()->fNextPresentationTime; // alias
       nextPT = usingSource()->fPresentationTime;

@@ -21,7 +21,10 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include "DynamicRTSPServer.hh"
 #include <liveMedia.hh>
 #include <string.h>
-
+#include <sys/types.h>   
+#include <dirent.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 DynamicRTSPServer*
 DynamicRTSPServer::createNew(UsageEnvironment& env, Port ourPort,
 			     UserAuthenticationDatabase* authDatabase,
@@ -149,7 +152,8 @@ static ServerMediaSession* createNewSMS(UsageEnvironment& env,
     NEW_SMS("H.264 Video");
     OutPacketBuffer::maxSize = 600000; // allow for some possibly large H.264 frames
     sms->addSubsession(H264VideoFileServerMediaSubsession::createNew(env, fileName, reuseSource));
-  } else if (strcmp(extension, ".265") == 0) {
+  }
+  else if (strcmp(extension, ".265") == 0) {
     // Assumed to be a H.265 Video Elementary Stream file:
     NEW_SMS("H.265 Video");
     OutPacketBuffer::maxSize = 600000; // allow for some possibly large H.265 frames
@@ -243,6 +247,19 @@ static ServerMediaSession* createNewSMS(UsageEnvironment& env,
     while ((smss = creationState.demux->newServerMediaSubsession()) != NULL) {
       sms->addSubsession(smss);
     }
+  }else{
+      struct stat st;
+      if(stat(fileName, &st) < 0){
+        return NULL;
+      }
+
+      if(!S_ISDIR(st.st_mode)){
+        return NULL;
+      }
+    
+      NEW_SMS("H264 directory");
+      OutPacketBuffer::maxSize = 600000; // allow for some possibly large H.264 frames
+      sms->addSubsession(H264VideoDirectoryServerMediaSubsession::createNew(env, fileName, reuseSource));
   }
 
   return sms;
