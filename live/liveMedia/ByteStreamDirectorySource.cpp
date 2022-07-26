@@ -123,15 +123,17 @@ void ByteStreamDirectorySource::doGetNextFrame() {
     // switch file
     if(fFid == NULL || feof(fFid)){
         if(fFid != NULL){
+            printf("close file:%s\n", fVideoIterator->second.c_str());
             fclose(fFid);
             fFid = NULL;
             fVideoIterator++;
-            if(fVideoIterator == fVideos.end()){
-                handleClosure();
-                return;
-            }
         }
-
+        
+        if(fVideoIterator == fVideos.end()){
+            printf("fVideoIterator in end\n");
+            handleClosure();
+            return;
+        }
         fPresentationTime.tv_sec = fVideoIterator->first;
         fPresentationTime.tv_usec = 1;
         fFid = fopen(fVideoIterator->second.c_str(), "rb");

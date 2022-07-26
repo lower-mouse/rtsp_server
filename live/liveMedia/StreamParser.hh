@@ -112,7 +112,7 @@ protected: // we're a virtual base class
 
   unsigned bankSize() const;
 
-  struct timeval getLastSeenPresentationTime() const{ return fLastSeenPresentationTime;}
+  struct timeval& getLastSeenPresentationTime() { return fLastSeenPresentationTime;}
 private:
   unsigned char* curBank() { return fCurBank; }
   unsigned char* nextToParse() { return &curBank()[fCurParserIndex]; }

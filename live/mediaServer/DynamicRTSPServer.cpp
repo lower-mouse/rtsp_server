@@ -126,11 +126,28 @@ sms = ServerMediaSession::createNew(env, fileName, fileName, descStr);\
 static ServerMediaSession* createNewSMS(UsageEnvironment& env,
 					char const* fileName, FILE* /*fid*/) {
   // Use the file name extension to determine the type of "ServerMediaSession":
-  char const* extension = strrchr(fileName, '.');
-  if (extension == NULL) return NULL;
-
-  ServerMediaSession* sms = NULL;
   Boolean const reuseSource = False;
+  ServerMediaSession* sms = NULL;
+  char const* extension = strrchr(fileName, '.');
+  if (extension == NULL) {
+      struct stat st;
+      if(stat(fileName, &st) < 0){
+        printf("stat failed\n");
+        return NULL;
+      }
+
+      if(!S_ISDIR(st.st_mode)){
+        printf("file %s is not directory\n", fileName);
+        return NULL;
+      }
+    
+      printf("create directory media sub session\n");
+      NEW_SMS("H264 directory");
+      OutPacketBuffer::maxSize = 600000; // allow for some possibly large H.264 frames
+      sms->addSubsession(H264VideoDirectoryServerMediaSubsession::createNew(env, fileName, reuseSource));    
+      return sms;
+  }
+
   if (strcmp(extension, ".aac") == 0) {
     // Assumed to be an AAC Audio (ADTS format) file:
     NEW_SMS("AAC Audio");
@@ -247,19 +264,6 @@ static ServerMediaSession* createNewSMS(UsageEnvironment& env,
     while ((smss = creationState.demux->newServerMediaSubsession()) != NULL) {
       sms->addSubsession(smss);
     }
-  }else{
-      struct stat st;
-      if(stat(fileName, &st) < 0){
-        return NULL;
-      }
-
-      if(!S_ISDIR(st.st_mode)){
-        return NULL;
-      }
-    
-      NEW_SMS("H264 directory");
-      OutPacketBuffer::maxSize = 600000; // allow for some possibly large H.264 frames
-      sms->addSubsession(H264VideoDirectoryServerMediaSubsession::createNew(env, fileName, reuseSource));
   }
 
   return sms;
