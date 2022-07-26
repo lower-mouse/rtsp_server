@@ -1,0 +1,4 @@
+INCLUDES = -Iinclude -I../UsageEnvironment/include
+PREFIX = ~/live/output/
+LIBDIR = $(PREFIX)/lib
+##### Change the following for your environment:
