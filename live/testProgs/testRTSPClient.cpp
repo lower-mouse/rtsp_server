@@ -22,7 +22,9 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 
 #include "liveMedia.hh"
 #include "BasicUsageEnvironment.hh"
-
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 // Forward function definitions:
 
 // RTSP 'response handlers':
@@ -162,6 +164,7 @@ private:
   u_int8_t* fReceiveBuffer;
   MediaSubsession& fSubsession;
   char* fStreamId;
+  int fd;
 };
 
 #define RTSP_CLIENT_VERBOSITY_LEVEL 1 // by default, print verbose output from each "RTSPClient"
@@ -482,7 +485,7 @@ StreamClientState::~StreamClientState() {
 
 // Even though we're not going to be doing anything with the incoming data, we still need to receive it.
 // Define the size of the buffer that we'll use:
-#define DUMMY_SINK_RECEIVE_BUFFER_SIZE 100000
+#define DUMMY_SINK_RECEIVE_BUFFER_SIZE 800000
 
 DummySink* DummySink::createNew(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId) {
   return new DummySink(env, subsession, streamId);
@@ -493,6 +496,10 @@ DummySink::DummySink(UsageEnvironment& env, MediaSubsession& subsession, char co
     fSubsession(subsession) {
   fStreamId = strDup(streamId);
   fReceiveBuffer = new u_int8_t[DUMMY_SINK_RECEIVE_BUFFER_SIZE];
+  fd = ::open("/mnt/mmc11/IFAPP/video.h264", O_TRUNC | O_CREAT | O_WRONLY, 0777);
+  if(fd < 0){
+      printf("open video.h264 failed\n");
+  }
 }
 
 DummySink::~DummySink() {
@@ -527,7 +534,10 @@ void DummySink::afterGettingFrame(unsigned frameSize, unsigned numTruncatedBytes
 #endif
   envir() << "\n";
 #endif
-  
+
+  int startCode=0x01000000;
+  ::write(fd, &startCode, 4);
+  ::write(fd, fReceiveBuffer, frameSize);
   // Then continue, to request the next frame of data:
   continuePlaying();
 }

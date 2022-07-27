@@ -103,7 +103,7 @@ char const* H264VideoDirectoryServerMediaSubsession::getAuxSDPLine(RTPSink* rtpS
 }
 
 FramedSource* H264VideoDirectoryServerMediaSubsession::createNewStreamSource(unsigned /*clientSessionId*/, unsigned& estBitrate) {
-  estBitrate = 500; // kbps, estimate
+  estBitrate = 20000; // kbps, estimate
 
   // Create the video source:
   ByteStreamDirectorySource* DirectorySource = ByteStreamDirectorySource::createNew(envir(), fDirectoryName);

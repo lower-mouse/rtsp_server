@@ -1415,7 +1415,7 @@ unsigned H264or5VideoStreamParser::parse()
 #ifdef DEBUG
       fprintf(stderr, "*****This NAL unit ends the current access unit*****\n");
 #endif
-      NeedInsertSei = True;
+ //     NeedInsertSei = True;
       usingSource()->fPictureEndMarker = True;
       ++usingSource()->fPictureCount;
       ++FrameCountInVideo;
