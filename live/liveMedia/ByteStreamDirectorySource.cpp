@@ -131,7 +131,8 @@ void ByteStreamDirectorySource::doGetNextFrame() {
         
         if(fVideoIterator == fVideos.end()){
             printf("fVideoIterator in end\n");
-            handleClosure();
+            exit(0);
+            // handleClosure();
             return;
         }
         fPresentationTime.tv_sec = fVideoIterator->first;
