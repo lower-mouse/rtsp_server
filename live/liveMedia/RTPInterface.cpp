@@ -343,8 +343,8 @@ Boolean RTPInterface::sendRTPorRTCPPacketOverTCP(u_int8_t* packet, unsigned pack
 						 int socketNum, unsigned char streamChannelId,
 						 TLSState* tlsState) {
 #ifdef DEBUG_SEND
-  fprintf(stderr, "sendRTPorRTCPPacketOverTCP: %d bytes over channel %d (socket %d)\n",
-	  packetSize, streamChannelId, socketNum); fflush(stderr);
+  // fprintf(stderr, "sendRTPorRTCPPacketOverTCP: %d bytes over channel %d (socket %d)\n",
+	//   packetSize, streamChannelId, socketNum); fflush(stderr);
 #endif
   // Send a RTP/RTCP packet over TCP, using the encoding defined in RFC 2326, section 10.12:
   //     $<streamChannelId><packetSize><packet>
@@ -357,11 +357,11 @@ Boolean RTPInterface::sendRTPorRTCPPacketOverTCP(u_int8_t* packet, unsigned pack
     framingHeader[1] = streamChannelId;
     framingHeader[2] = (u_int8_t) ((packetSize&0xFF00)>>8);
     framingHeader[3] = (u_int8_t) (packetSize&0xFF);
-    if (!sendDataOverTCP(socketNum, tlsState, framingHeader, 4, True)) break;
+    if (!sendDataOverTCP(socketNum, tlsState, framingHeader, 4, False)) break;
 
     if (!sendDataOverTCP(socketNum, tlsState, packet, packetSize, True)) break;
 #ifdef DEBUG_SEND
-    fprintf(stderr, "sendRTPorRTCPPacketOverTCP: completed\n"); fflush(stderr);
+    // fprintf(stderr, "sendRTPorRTCPPacketOverTCP: completed\n"); fflush(stderr);
 #endif
 
     return True;
@@ -386,38 +386,51 @@ Boolean RTPInterface::sendDataOverTCP(int socketNum, TLSState* tlsState,
   if (sendResult < (int)dataSize) {
     // The TCP send() failed - at least partially.
 
+    int count = 0;
     unsigned numBytesSentSoFar = sendResult < 0 ? 0 : (unsigned)sendResult;
     if (numBytesSentSoFar > 0 || (forceSendToSucceed && envir().getErrno() == EAGAIN)) {
       // The OS's TCP send buffer has filled up (because the stream's bitrate has exceeded
       // the capacity of the TCP connection!).
       // Force this data write to succeed, by blocking if necessary until it does:
-      unsigned numBytesRemainingToSend = dataSize - numBytesSentSoFar;
-#ifdef DEBUG_SEND
-      fprintf(stderr, "sendDataOverTCP: resending %d-byte send (blocking)\n", numBytesRemainingToSend); fflush(stderr);
-#endif
-      makeSocketBlocking(socketNum, RTPINTERFACE_BLOCKING_WRITE_TIMEOUT_MS);
-      sendResult = (tlsState != NULL && tlsState->isNeeded)
-	? tlsState->write((char const*)(&data[numBytesSentSoFar]), numBytesRemainingToSend)
-	: send(socketNum, (char const*)(&data[numBytesSentSoFar]), numBytesRemainingToSend, 0/*flags*/);
-      makeSocketNonBlocking(socketNum);
-      if ((unsigned)sendResult != numBytesRemainingToSend) {
-	// The blocking "send()" failed, or timed out.  In either case, we assume that the
-	// TCP connection has failed (or is 'hanging' indefinitely), and we stop using it
-	// (for both RTP and RTP).
-	// (If we kept using the socket here, the RTP or RTCP packet write would be in an
-	//  incomplete, inconsistent state.)
-#ifdef DEBUG_SEND
-	fprintf(stderr, "sendDataOverTCP: blocking send() failed (delivering %d bytes out of %d); closing socket %d\n", sendResult, numBytesRemainingToSend, socketNum); fflush(stderr);
-#endif
-	// removeStreamSocket(socketNum, 0xFF);
-	return False;
+      while(1){
+        unsigned numBytesRemainingToSend = dataSize - numBytesSentSoFar;
+  #ifdef DEBUG_SEND
+        fprintf(stderr, "sendDataOverTCP: resending %d-byte send (blocking)\n", numBytesRemainingToSend); fflush(stderr);
+  #endif
+        makeSocketBlocking(socketNum, RTPINTERFACE_BLOCKING_WRITE_TIMEOUT_MS);
+        sendResult = (tlsState != NULL && tlsState->isNeeded)
+    ? tlsState->write((char const*)(&data[numBytesSentSoFar]), numBytesRemainingToSend)
+    : send(socketNum, (char const*)(&data[numBytesSentSoFar]), numBytesRemainingToSend, 0/*flags*/);
+
+        makeSocketNonBlocking(socketNum);
+        if ((sendResult < 0 && envir().getErrno() != EAGAIN) || count > 4){
+          fprintf(stderr, "sendDataOverTCP faield, count:%d errno:%d\n", count, envir().getErrno());
+          removeStreamSocket(socketNum, 0xFF);
+          return False;     
+        }
+        if ((unsigned)sendResult != numBytesRemainingToSend) {
+          numBytesSentSoFar += numBytesRemainingToSend;
+          // The blocking "send()" failed, or timed out.  In either case, we assume that the
+          // TCP connection has failed (or is 'hanging' indefinitely), and we stop using it
+          // (for both RTP and RTP).
+          // (If we kept using the socket here, the RTP or RTCP packet write would be in an
+          //  incomplete, inconsistent state.)
+        #ifdef DEBUG_SEND
+          fprintf(stderr, "sendDataOverTCP: blocking send() failed (delivering %d bytes out of %d); closing socket %d\n", sendResult, numBytesRemainingToSend, socketNum); fflush(stderr);
+        #endif
+        count++;
+          // removeStreamSocket(socketNum, 0xFF);
+          // return False;
+        }else{
+          break;
+        }
       }
 
       return True;
     } else if (sendResult < 0 && envir().getErrno() != EAGAIN) {
       // Because the "send()" call failed, assume that the socket is now unusable, so stop
       // using it (for both RTP and RTCP):
-      // removeStreamSocket(socketNum, 0xFF);
+      removeStreamSocket(socketNum, 0xFF);
     }
 
     return False;
