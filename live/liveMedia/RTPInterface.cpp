@@ -409,7 +409,7 @@ Boolean RTPInterface::sendDataOverTCP(int socketNum, TLSState* tlsState,
 #ifdef DEBUG_SEND
 	fprintf(stderr, "sendDataOverTCP: blocking send() failed (delivering %d bytes out of %d); closing socket %d\n", sendResult, numBytesRemainingToSend, socketNum); fflush(stderr);
 #endif
-	removeStreamSocket(socketNum, 0xFF);
+	// removeStreamSocket(socketNum, 0xFF);
 	return False;
       }
 
@@ -417,7 +417,7 @@ Boolean RTPInterface::sendDataOverTCP(int socketNum, TLSState* tlsState,
     } else if (sendResult < 0 && envir().getErrno() != EAGAIN) {
       // Because the "send()" call failed, assume that the socket is now unusable, so stop
       // using it (for both RTP and RTCP):
-      removeStreamSocket(socketNum, 0xFF);
+      // removeStreamSocket(socketNum, 0xFF);
     }
 
     return False;
