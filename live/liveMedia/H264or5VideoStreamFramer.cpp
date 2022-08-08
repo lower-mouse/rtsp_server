@@ -225,7 +225,7 @@ H264or5VideoStreamParser ::H264or5VideoStreamParser(int hNumber, H264or5VideoStr
       fHNumber(hNumber), fOutputStartCodeSize(includeStartCodeInOutput ? 4 : 0), fHaveSeenFirstStartCode(False), fHaveSeenFirstByteOfNALUnit(False), fParsedFrameRate(0.0),
       cpb_removal_delay_length_minus1(23), dpb_output_delay_length_minus1(23),
       CpbDpbDelaysPresentFlag(0), pic_struct_present_flag(0),
-      DeltaTfiDivisor(hNumber == 264 ? 2.0 : 1.0),NeedInsertSei(False),FrameCountInVideo(0)
+      DeltaTfiDivisor(hNumber == 264 ? 2.0 : 1.0),NeedInsertSei(True),FrameCountInVideo(0)
 {
 }
 
@@ -1415,7 +1415,7 @@ unsigned H264or5VideoStreamParser::parse()
 #ifdef DEBUG
       fprintf(stderr, "*****This NAL unit ends the current access unit*****\n");
 #endif
- //     NeedInsertSei = True;
+     NeedInsertSei = True;
       usingSource()->fPictureEndMarker = True;
       ++usingSource()->fPictureCount;
       ++FrameCountInVideo;
