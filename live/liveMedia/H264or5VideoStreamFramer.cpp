@@ -89,7 +89,7 @@ H264or5VideoStreamFramer ::H264or5VideoStreamFramer(int hNumber, UsageEnvironmen
   fParser = createParser
                 ? new H264or5VideoStreamParser(hNumber, this, inputSource, includeStartCodeInOutput)
                 : NULL;
-  fFrameRate = 12.5; // We assume a frame rate of 30 fps, unless we learn otherwise (from parsing a VPS or SPS NAL unit)
+  fFrameRate = 12; // We assume a frame rate of 30 fps, unless we learn otherwise (from parsing a VPS or SPS NAL unit)
 
 }
 
