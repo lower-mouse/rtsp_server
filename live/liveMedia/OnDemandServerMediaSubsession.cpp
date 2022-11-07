@@ -460,7 +460,7 @@ void OnDemandServerMediaSubsession
   unsigned sdpFmtSize = strlen(sdpFmt)
     + strlen(mediaType) + 5 /* max short len */ + 1 + 3 /* max char len */
     + 3/*IP4 or IP6*/ + strlen(ipAddressStr.val())
-    + 25 /* max int len */
+    + 45 /* max int len */
     + strlen(rtpmapLine)
     + strlen(keyMgmtLine)
     + strlen(rtcpmuxLine)
@@ -474,7 +474,7 @@ void OnDemandServerMediaSubsession
 	  fParentSession->streamingUsesSRTP ? "S" : "",
 	  rtpPayloadType, // m= <fmt list>
 	  addressForSDP.ss_family == AF_INET ? "IP4" : "IP6", ipAddressStr.val(), // c= address
-    12.0,       // a=framerate: 
+    16.0,       // a=framerate: 
 	  estBitrate, // b=AS:<bandwidth>
 	  rtpmapLine, // a=rtpmap:... (if present)
 	  keyMgmtLine, // a=key-mgmt:... (if present)

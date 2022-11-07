@@ -41,7 +41,7 @@ static videoMap getDirectoryVideosInfo(char const* DirectoryName){
     dir = opendir(DirectoryName);
     while((ptr = readdir(dir)) != NULL)
     {
-        printf("d_name : %s\n", ptr->d_name);
+        // printf("d_name : %s\n", ptr->d_name);
         std::string subFile = std::string(DirectoryName) + "/" + std::string(ptr->d_name);
         int fd = open(subFile.c_str(), O_RDONLY);
         if(fd < 0){
@@ -67,6 +67,10 @@ static videoMap getDirectoryVideosInfo(char const* DirectoryName){
     }
 
     closedir(dir);
+
+    for(auto& it:videos){
+      printf("playback file:%s\n", it.second.c_str());
+    }
     return videos;
 }
 

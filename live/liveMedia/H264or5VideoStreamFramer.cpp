@@ -89,7 +89,7 @@ H264or5VideoStreamFramer ::H264or5VideoStreamFramer(int hNumber, UsageEnvironmen
   fParser = createParser
                 ? new H264or5VideoStreamParser(hNumber, this, inputSource, includeStartCodeInOutput)
                 : NULL;
-  fFrameRate = 12; // We assume a frame rate of 30 fps, unless we learn otherwise (from parsing a VPS or SPS NAL unit)
+  fFrameRate = 16; // We assume a frame rate of 30 fps, unless we learn otherwise (from parsing a VPS or SPS NAL unit)
 
 }
 
@@ -1154,7 +1154,7 @@ unsigned H264or5VideoStreamParser::parse()
     sprintf(msecond, "%03d", ms%1000);
 
     std::string seiInfo = std::to_string(second) + msecond + std::string(",113.960833,22.550000,0.000000,691");
-    fprintf(stderr, "%s\n", seiInfo.c_str());
+//    fprintf(stderr, "%s\n", seiInfo.c_str());
 
     saveByte(6);
     saveByte(0xf0);
@@ -1241,6 +1241,11 @@ unsigned H264or5VideoStreamParser::parse()
     else
     {
       u_int32_t next4Bytes = test4Bytes();
+      if(next4Bytes == 0x00000001){
+        setParseState(); // ensures forward progress
+        skipBytes(4); // skip this initial code
+        next4Bytes = test4Bytes();
+      }
       if (!fHaveSeenFirstByteOfNALUnit)
       {
         fFirstByteOfNALUnit = next4Bytes >> 24;
