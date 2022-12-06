@@ -1,4 +1,4 @@
-INCLUDES = -Iinclude -I../UsageEnvironment/include -I../groupsock/include
+INCLUDES = -Iinclude -I../UsageEnvironment/include -I../groupsock/include -I../mp4Reader/include/
 PREFIX = ~/live/output/
 LIBDIR = $(PREFIX)/lib
 ##### Change the following for your environment:
@@ -32,7 +32,7 @@ all:	$(ALL)
 	$(CPLUSPLUS_COMPILER) -c $(CPLUSPLUS_FLAGS) $<
 
 MP3_SOURCE_OBJS = MP3FileSource.$(OBJ) MP3Transcoder.$(OBJ) MP3ADU.$(OBJ) MP3ADUdescriptor.$(OBJ) MP3ADUinterleaving.$(OBJ) MP3ADUTranscoder.$(OBJ) MP3StreamState.$(OBJ) MP3Internals.$(OBJ) MP3InternalsHuffman.$(OBJ) MP3InternalsHuffmanTable.$(OBJ) MP3ADURTPSource.$(OBJ)
-MPEG_SOURCE_OBJS = MPEG1or2Demux.$(OBJ) MPEG1or2DemuxedElementaryStream.$(OBJ) MPEGVideoStreamFramer.$(OBJ) MPEG1or2VideoStreamFramer.$(OBJ) MPEG1or2VideoStreamDiscreteFramer.$(OBJ) MPEG4VideoStreamFramer.$(OBJ) MPEG4VideoStreamDiscreteFramer.$(OBJ) H264or5VideoStreamFramer.$(OBJ) H264or5VideoStreamDiscreteFramer.$(OBJ) H264VideoStreamFramer.$(OBJ) H264VideoStreamDiscreteFramer.$(OBJ) H265VideoStreamFramer.$(OBJ) H265VideoStreamDiscreteFramer.$(OBJ) MPEGVideoStreamParser.$(OBJ) MPEG1or2AudioStreamFramer.$(OBJ) MPEG1or2AudioRTPSource.$(OBJ) MPEG4LATMAudioRTPSource.$(OBJ) MPEG4ESVideoRTPSource.$(OBJ) MPEG4GenericRTPSource.$(OBJ) $(MP3_SOURCE_OBJS) MPEG1or2VideoRTPSource.$(OBJ) MPEG2TransportStreamMultiplexor.$(OBJ) MPEG2TransportStreamFromPESSource.$(OBJ) MPEG2TransportStreamFromESSource.$(OBJ) MPEG2TransportStreamFramer.$(OBJ) MPEG2TransportStreamAccumulator.$(OBJ) ADTSAudioFileSource.$(OBJ) ADTSAudioStreamDiscreteFramer.$(OBJ)
+MPEG_SOURCE_OBJS = MPEG1or2Demux.$(OBJ) MPEG1or2DemuxedElementaryStream.$(OBJ) MPEGVideoStreamFramer.$(OBJ) MPEG1or2VideoStreamFramer.$(OBJ) MPEG1or2VideoStreamDiscreteFramer.$(OBJ) MPEG4VideoStreamFramer.$(OBJ) MPEG4VideoStreamDiscreteFramer.$(OBJ) H264or5VideoStreamFramer.$(OBJ) H264or5VideoStreamDiscreteFramer.$(OBJ) H264VideoStreamFramer.$(OBJ) H264VideoStreamDiscreteFramer.$(OBJ) H265VideoStreamFramer.$(OBJ) H265VideoStreamDiscreteFramer.$(OBJ) MPEGVideoStreamParser.$(OBJ) MPEG1or2AudioStreamFramer.$(OBJ) MPEG1or2AudioRTPSource.$(OBJ) MPEG4LATMAudioRTPSource.$(OBJ) MPEG4ESVideoRTPSource.$(OBJ) MPEG4GenericRTPSource.$(OBJ) $(MP3_SOURCE_OBJS) MPEG1or2VideoRTPSource.$(OBJ) MPEG2TransportStreamMultiplexor.$(OBJ) MPEG2TransportStreamFromPESSource.$(OBJ) MPEG2TransportStreamFromESSource.$(OBJ) MPEG2TransportStreamFramer.$(OBJ) MPEG2TransportStreamAccumulator.$(OBJ) ADTSAudioFileSource.$(OBJ) ADTSAudioStreamDiscreteFramer.$(OBJ) Mp4VideoDirectoryServerMediaSubsession.$(OBJ) Mp4DirectorySource.$(OBJ)
 #JPEG_SOURCE_OBJS = JPEGVideoSource.$(OBJ) JPEGVideoRTPSource.$(OBJ) JPEG2000VideoStreamFramer.$(OBJ) JPEG2000VideoStreamParser.$(OBJ) JPEG2000VideoRTPSource.$(OBJ)
 JPEG_SOURCE_OBJS = JPEGVideoSource.$(OBJ) JPEGVideoRTPSource.$(OBJ) JPEG2000VideoRTPSource.$(OBJ)
 H263_SOURCE_OBJS = H263plusVideoRTPSource.$(OBJ) H263plusVideoStreamFramer.$(OBJ) H263plusVideoStreamParser.$(OBJ)
@@ -441,6 +441,7 @@ DigestAuthentication.$(CPP):	include/DigestAuthentication.hh include/ourMD5.hh
 ourMD5.$(CPP):	include/ourMD5.hh
 Base64.$(CPP):	include/Base64.hh
 Locale.$(CPP):	include/Locale.hh
+include/Mp4DirectorySource.hh: ../mp4Reader/include/Mp4ReaderInterface.h
 
 include/liveMedia.hh:: include/JPEG2000VideoRTPSource.hh include/JPEG2000VideoRTPSink.hh
 #include/liveMedia.hh:: include/JPEG2000VideoStreamFramer.hh include/JPEG2000VideoFileServerMediaSubsession.hh

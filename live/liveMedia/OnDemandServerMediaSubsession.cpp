@@ -474,7 +474,7 @@ void OnDemandServerMediaSubsession
 	  fParentSession->streamingUsesSRTP ? "S" : "",
 	  rtpPayloadType, // m= <fmt list>
 	  addressForSDP.ss_family == AF_INET ? "IP4" : "IP6", ipAddressStr.val(), // c= address
-    12.5,       // a=framerate: 
+    16.0,       // a=framerate: 
 	  estBitrate, // b=AS:<bandwidth>
 	  rtpmapLine, // a=rtpmap:... (if present)
 	  keyMgmtLine, // a=key-mgmt:... (if present)

@@ -89,7 +89,7 @@ H264or5VideoStreamFramer ::H264or5VideoStreamFramer(int hNumber, UsageEnvironmen
   fParser = createParser
                 ? new H264or5VideoStreamParser(hNumber, this, inputSource, includeStartCodeInOutput)
                 : NULL;
-  fFrameRate = 12.5; // We assume a frame rate of 30 fps, unless we learn otherwise (from parsing a VPS or SPS NAL unit)
+  fFrameRate = 16; // We assume a frame rate of 30 fps, unless we learn otherwise (from parsing a VPS or SPS NAL unit)
 
 }
 
@@ -1136,42 +1136,42 @@ void H264or5VideoStreamParser::flushInput()
 #include <string>
 unsigned H264or5VideoStreamParser::parse()
 {
-  if(NeedInsertSei){
-    unsigned int ms = 0;
-    char msecond[10];
-    struct timeval& t = getLastSeenPresentationTime();
+//   if(NeedInsertSei){
+//     unsigned int ms = 0;
+//     char msecond[10];
+//     struct timeval& t = getLastSeenPresentationTime();
 
-    if(t.tv_usec == 1){
-      printf("switch video, last video FrameCount:%d Frame Rate%lf\n", FrameCountInVideo, usingSource()->fFrameRate);
-      FrameCountInVideo = 0;
-      t.tv_usec = 0;
-    }
+//     if(t.tv_usec == 1){
+//       printf("switch video, last video FrameCount:%d Frame Rate%lf\n", FrameCountInVideo, usingSource()->fFrameRate);
+//       FrameCountInVideo = 0;
+//       t.tv_usec = 0;
+//     }
 
-    if(FrameCountInVideo != 0){
-      ms = (FrameCountInVideo * 1000) / usingSource()->fFrameRate;
-    }
-    long int second = t.tv_sec + (ms / 1000);
-    sprintf(msecond, "%03d", ms%1000);
+//     if(FrameCountInVideo != 0){
+//       ms = (FrameCountInVideo * 1000) / usingSource()->fFrameRate;
+//     }
+//     long int second = t.tv_sec + (ms / 1000);
+//     sprintf(msecond, "%03d", ms%1000);
 
-    std::string seiInfo = std::to_string(second) + msecond + std::string(",113.960833,22.550000,0.000000,691");
-//    fprintf(stderr, "%s\n", seiInfo.c_str());
+//     std::string seiInfo = std::to_string(second) + msecond + std::string(",113.960833,22.550000,0.000000,691");
+// //    fprintf(stderr, "%s\n", seiInfo.c_str());
 
-    saveByte(6);
-    saveByte(0xf0);
-    unsigned char* lenght = fTo;
-    saveByte(0x0);
-    for(auto it : seiInfo){
-      (*lenght)++;
-      saveByte(it);
-    }
+//     saveByte(6);
+//     saveByte(0xf0);
+//     unsigned char* lenght = fTo;
+//     saveByte(0x0);
+//     for(auto it : seiInfo){
+//       (*lenght)++;
+//       saveByte(it);
+//     }
 
-    saveByte(0x80);
-    NeedInsertSei = false;
+//     saveByte(0x80);
+//     NeedInsertSei = false;
 
-    setParseState();
- //   fprintf(stderr, "send sei lenght:%d \n", curFrameSize());
-    return curFrameSize();  
-  }
+//     setParseState();
+//  //   fprintf(stderr, "send sei lenght:%d \n", curFrameSize());
+//     return curFrameSize();  
+//   }
 
   try
   {
@@ -1241,11 +1241,11 @@ unsigned H264or5VideoStreamParser::parse()
     else
     {
       u_int32_t next4Bytes = test4Bytes();
-      if(next4Bytes == 0x00000001){
-        setParseState(); // ensures forward progress
-        skipBytes(4); // skip this initial code
-        next4Bytes = test4Bytes();
-      }
+      // if(next4Bytes == 0x00000001){
+      //   setParseState(); // ensures forward progress
+      //   skipBytes(4); // skip this initial code
+      //   next4Bytes = test4Bytes();
+      // }
       if (!fHaveSeenFirstByteOfNALUnit)
       {
         fFirstByteOfNALUnit = next4Bytes >> 24;

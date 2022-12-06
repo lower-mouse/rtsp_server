@@ -134,4 +134,5 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include "HLSSegmenter.hh"
 #include "MPEG2TransportStreamAccumulator.hh"
 #include "H264VideoDirectoryServerMediaSubsession.hh"
+#include "Mp4VideoDirectoryServerMediaSubsession.hh"
 #endif
