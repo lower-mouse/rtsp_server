@@ -210,8 +210,13 @@ void Mp4DirectorySource::doReadFromDirectory() {
 
     if(frame.type == Ifai::Ifmp4::FrameType::video){
       if(frame.sync_frame){
-        saveData(fMp4Info->sps.data(), fMp4Info->sps.size());
-        saveData(fMp4Info->pps.data(), fMp4Info->pps.size());
+        if(!fMp4Info->sps.empty()){
+          saveData(fMp4Info->sps.data(), fMp4Info->sps.size());
+        }
+        
+        if(!fMp4Info->pps.empty()){
+          saveData(fMp4Info->pps.data(), fMp4Info->pps.size());
+        }
       }
       
       saveData(g_nal_head, 4);
