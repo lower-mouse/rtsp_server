@@ -144,8 +144,8 @@ static ServerMediaSession* createNewSMS(UsageEnvironment& env,
       printf("create directory media sub session\n");
       NEW_SMS("H264 directory");
       OutPacketBuffer::maxSize = 6000000; // allow for some possibly large H.264 frames
-      // sms->addSubsession(H264VideoDirectoryServerMediaSubsession::createNew(env, fileName, reuseSource));    
-      sms->addSubsession(Mp4VideoDirectoryServerMediaSubsession::createNew(env, fileName, reuseSource));    
+      sms->addSubsession(H264VideoDirectoryServerMediaSubsession::createNew(env, fileName, reuseSource));    
+      // sms->addSubsession(Mp4VideoDirectoryServerMediaSubsession::createNew(env, fileName, reuseSource));    
       return sms;
   }
 

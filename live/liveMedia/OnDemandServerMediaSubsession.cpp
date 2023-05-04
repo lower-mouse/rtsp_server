@@ -449,7 +449,7 @@ void OnDemandServerMediaSubsession
   char const* const sdpFmt =
     "m=%s %u RTP/%sAVP %d\r\n"
     "c=IN %s %s\r\n"
-    "a=framerate: %f\r\n"
+    // "a=framerate: %f\r\n"
     "b=AS:%u\r\n"
     "%s"
     "%s"
@@ -474,7 +474,7 @@ void OnDemandServerMediaSubsession
 	  fParentSession->streamingUsesSRTP ? "S" : "",
 	  rtpPayloadType, // m= <fmt list>
 	  addressForSDP.ss_family == AF_INET ? "IP4" : "IP6", ipAddressStr.val(), // c= address
-    16.0,       // a=framerate: 
+    // 25.0,       // a=framerate: 
 	  estBitrate, // b=AS:<bandwidth>
 	  rtpmapLine, // a=rtpmap:... (if present)
 	  keyMgmtLine, // a=key-mgmt:... (if present)
