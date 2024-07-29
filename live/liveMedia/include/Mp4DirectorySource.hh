@@ -73,7 +73,7 @@ private:
   unsigned fLastPlayTime;
   Boolean fHaveStartedReading;
   Boolean fLimitNumBytesToStream;
-  unsigned int fWriteLen;
+  size_t fWriteLen;
   u_int64_t fNumBytesToStream; // used iff "fLimitNumBytesToStream" is True
   videoMap fVideos;
   videoMap::iterator fVideoIterator;

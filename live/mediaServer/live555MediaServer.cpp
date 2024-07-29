@@ -22,10 +22,45 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include "version.hh"
 #include <GroupsockHelper.hh> // for "weHaveAnIPv*Address()"
 
+int g_set_framerate = 0;
+int g_type = 0;
+
+void usage(int argc, char** argv, portNumBits& port){
+  int opt;
+    while ((opt = getopt(argc, argv, "p:f:t:h")) != -1) {
+        switch (opt) {
+            case 'p':
+                // 将 optarg 转换为整数，表示端口号
+                port = atoi(optarg);
+                fprintf(stderr, "set rtsp server port:%d\n", port);
+                break;
+            case 'f':
+                // 将 optarg 转换为整数，表示端口号
+                g_set_framerate = atoi(optarg);
+                fprintf(stderr, "set rtsp server send framerate:%d\n", g_set_framerate);
+                break;       
+            case 't':
+                // 将 optarg 转换为整数，表示端口号
+                g_type = atoi(optarg);
+                fprintf(stderr, "set rtsp server mode:%d\n", g_type);
+                break;      
+            case 'h':
+                fprintf(stderr, "Usage: %s -p PORT \n-f frame rate \n-t [0: h264 1:mp4]\n", argv[0]);
+                break;      
+            case '?':
+                // 无效选项或缺少参数时的处理
+                fprintf(stderr, "Usage: %s -p PORT\n", argv[0]);
+        }
+    }  
+}
+
 int main(int argc, char** argv) {
   // Begin by setting up our usage environment:
   TaskScheduler* scheduler = BasicTaskScheduler::createNew();
   UsageEnvironment* env = BasicUsageEnvironment::createNew(*scheduler);
+
+  portNumBits rtspServerPortNum = 554;
+  usage(argc, argv, rtspServerPortNum);
 
   UserAuthenticationDatabase* authDB = NULL;
 #ifdef ACCESS_CONTROL
@@ -39,10 +74,10 @@ int main(int argc, char** argv) {
   // Create the RTSP server.  Try first with the default port number (554),
   // and then with the alternative port number (8554):
   RTSPServer* rtspServer;
-  portNumBits rtspServerPortNum = 554;
   rtspServer = DynamicRTSPServer::createNew(*env, rtspServerPortNum, authDB);
   if (rtspServer == NULL) {
-    rtspServerPortNum = 8555;
+    *env << "Failed to create RTSP server port: " << rtspServerPortNum << " ,usage default port 8556" << "\n";
+    rtspServerPortNum = 8556;
     rtspServer = DynamicRTSPServer::createNew(*env, rtspServerPortNum, authDB);
   }
   if (rtspServer == NULL) {

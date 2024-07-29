@@ -116,6 +116,7 @@ static void onOggDemuxCreation(OggFileServerDemux* newDemux, void* clientData) {
   creationState->watchVariable = 1;
 }
 // END Special code for handling Ogg files:
+extern int g_type;
 
 #define NEW_SMS(description) do {\
 char const* descStr = description\
@@ -144,8 +145,11 @@ static ServerMediaSession* createNewSMS(UsageEnvironment& env,
       printf("create directory media sub session\n");
       NEW_SMS("H264 directory");
       OutPacketBuffer::maxSize = 6000000; // allow for some possibly large H.264 frames
-      sms->addSubsession(H264VideoDirectoryServerMediaSubsession::createNew(env, fileName, reuseSource));    
-      // sms->addSubsession(Mp4VideoDirectoryServerMediaSubsession::createNew(env, fileName, reuseSource));    
+      if(g_type == 0) {
+        sms->addSubsession(H264VideoDirectoryServerMediaSubsession::createNew(env, fileName, reuseSource));    
+      }else{
+        sms->addSubsession(Mp4VideoDirectoryServerMediaSubsession::createNew(env, fileName, reuseSource));    
+      }
       return sms;
   }
 
@@ -171,7 +175,7 @@ static ServerMediaSession* createNewSMS(UsageEnvironment& env,
     OutPacketBuffer::maxSize = 600000; // allow for some possibly large H.264 frames
     sms->addSubsession(H264VideoFileServerMediaSubsession::createNew(env, fileName, reuseSource));
   }
-  else if (strcmp(extension, ".265") == 0) {
+  else if (strcmp(extension, ".h265") == 0) {
     // Assumed to be a H.265 Video Elementary Stream file:
     NEW_SMS("H.265 Video");
     OutPacketBuffer::maxSize = 600000; // allow for some possibly large H.265 frames

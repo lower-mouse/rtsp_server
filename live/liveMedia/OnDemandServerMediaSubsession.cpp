@@ -430,6 +430,7 @@ void OnDemandServerMediaSubsession
     streamState->sendRTCPAppPacket(subtype, name, appDependentData, appDependentDataSize);
   }
 }
+extern int g_set_framerate;
 
 void OnDemandServerMediaSubsession
 ::setSDPLinesFromRTPSink(RTPSink* rtpSink, FramedSource* inputSource, unsigned estBitrate) {
@@ -446,46 +447,89 @@ void OnDemandServerMediaSubsession
   char const* auxSDPLine = getAuxSDPLine(rtpSink, inputSource);
   if (auxSDPLine == NULL) auxSDPLine = "";
 
-  char const* const sdpFmt =
-    "m=%s %u RTP/%sAVP %d\r\n"
-    "c=IN %s %s\r\n"
-    // "a=framerate: %f\r\n"
-    "b=AS:%u\r\n"
-    "%s"
-    "%s"
-    "%s"
-    "%s"
-    "%s"
-    "a=control:%s\r\n";
-  unsigned sdpFmtSize = strlen(sdpFmt)
-    + strlen(mediaType) + 5 /* max short len */ + 1 + 3 /* max char len */
-    + 3/*IP4 or IP6*/ + strlen(ipAddressStr.val())
-    + 45 /* max int len */
-    + strlen(rtpmapLine)
-    + strlen(keyMgmtLine)
-    + strlen(rtcpmuxLine)
-    + strlen(rangeLine)
-    + strlen(auxSDPLine)
-    + strlen(trackId());
-  char* sdpLines = new char[sdpFmtSize];
-  sprintf(sdpLines, sdpFmt,
-	  mediaType, // m= <media>
-	  portNumForSDP, // m= <port>
-	  fParentSession->streamingUsesSRTP ? "S" : "",
-	  rtpPayloadType, // m= <fmt list>
-	  addressForSDP.ss_family == AF_INET ? "IP4" : "IP6", ipAddressStr.val(), // c= address
-    // 25.0,       // a=framerate: 
-	  estBitrate, // b=AS:<bandwidth>
-	  rtpmapLine, // a=rtpmap:... (if present)
-	  keyMgmtLine, // a=key-mgmt:... (if present)
-	  rtcpmuxLine, // a=rtcp-mux:... (if present)
-	  rangeLine, // a=range:... (if present)
-	  auxSDPLine, // optional extra SDP line
-	  trackId()); // a=control:<track-id>
-  delete[] (char*)rangeLine; delete[] keyMgmtLine; delete[] rtpmapLine;
+  if(g_set_framerate == 0) {
+    char const* const sdpFmt =
+      "m=%s %u RTP/%sAVP %d\r\n"
+      "c=IN %s %s\r\n"
+      // "a=framerate: %f\r\n"
+      "b=AS:%u\r\n"
+      "%s"
+      "%s"
+      "%s"
+      "%s"
+      "%s"
+      "a=control:%s\r\n";
+    unsigned sdpFmtSize = strlen(sdpFmt)
+      + strlen(mediaType) + 5 /* max short len */ + 1 + 3 /* max char len */
+      + 3/*IP4 or IP6*/ + strlen(ipAddressStr.val())
+      + 45 /* max int len */
+      + strlen(rtpmapLine)
+      + strlen(keyMgmtLine)
+      + strlen(rtcpmuxLine)
+      + strlen(rangeLine)
+      + strlen(auxSDPLine)
+      + strlen(trackId());
+    char* sdpLines = new char[sdpFmtSize];
+    sprintf(sdpLines, sdpFmt,
+      mediaType, // m= <media>
+      portNumForSDP, // m= <port>
+      fParentSession->streamingUsesSRTP ? "S" : "",
+      rtpPayloadType, // m= <fmt list>
+      addressForSDP.ss_family == AF_INET ? "IP4" : "IP6", ipAddressStr.val(), // c= address
+      // 25.0,       // a=framerate: 
+      estBitrate, // b=AS:<bandwidth>
+      rtpmapLine, // a=rtpmap:... (if present)
+      keyMgmtLine, // a=key-mgmt:... (if present)
+      rtcpmuxLine, // a=rtcp-mux:... (if present)
+      rangeLine, // a=range:... (if present)
+      auxSDPLine, // optional extra SDP line
+      trackId()); // a=control:<track-id>
+    delete[] (char*)rangeLine; delete[] keyMgmtLine; delete[] rtpmapLine;
 
-  delete[] fSDPLines; fSDPLines = strDup(sdpLines);
-  delete[] sdpLines;
+    delete[] fSDPLines; fSDPLines = strDup(sdpLines);
+    delete[] sdpLines;
+  }else {
+    char const* const sdpFmt =
+      "m=%s %u RTP/%sAVP %d\r\n"
+      "c=IN %s %s\r\n"
+      "a=framerate: %f\r\n"
+      "b=AS:%u\r\n"
+      "%s"
+      "%s"
+      "%s"
+      "%s"
+      "%s"
+      "a=control:%s\r\n";
+    unsigned sdpFmtSize = strlen(sdpFmt)
+      + strlen(mediaType) + 5 /* max short len */ + 1 + 3 /* max char len */
+      + 3/*IP4 or IP6*/ + strlen(ipAddressStr.val())
+      + 45 /* max int len */
+      + strlen(rtpmapLine)
+      + strlen(keyMgmtLine)
+      + strlen(rtcpmuxLine)
+      + strlen(rangeLine)
+      + strlen(auxSDPLine)
+      + strlen(trackId());
+    char* sdpLines = new char[sdpFmtSize];
+    sprintf(sdpLines, sdpFmt,
+      mediaType, // m= <media>
+      portNumForSDP, // m= <port>
+      fParentSession->streamingUsesSRTP ? "S" : "",
+      rtpPayloadType, // m= <fmt list>
+      addressForSDP.ss_family == AF_INET ? "IP4" : "IP6", ipAddressStr.val(), // c= address
+      static_cast<float>(g_set_framerate),       // a=framerate: 
+      estBitrate, // b=AS:<bandwidth>
+      rtpmapLine, // a=rtpmap:... (if present)
+      keyMgmtLine, // a=key-mgmt:... (if present)
+      rtcpmuxLine, // a=rtcp-mux:... (if present)
+      rangeLine, // a=range:... (if present)
+      auxSDPLine, // optional extra SDP line
+      trackId()); // a=control:<track-id>
+    delete[] (char*)rangeLine; delete[] keyMgmtLine; delete[] rtpmapLine;
+
+    delete[] fSDPLines; fSDPLines = strDup(sdpLines);
+    delete[] sdpLines;    
+  }
 }
 
 

@@ -75,6 +75,7 @@ private:
 };
 
 ////////// H264or5VideoStreamFramer implementation //////////
+extern int g_set_framerate;
 
 H264or5VideoStreamFramer ::H264or5VideoStreamFramer(int hNumber, UsageEnvironment &env, FramedSource *inputSource,
                                                     Boolean createParser,
@@ -89,7 +90,11 @@ H264or5VideoStreamFramer ::H264or5VideoStreamFramer(int hNumber, UsageEnvironmen
   fParser = createParser
                 ? new H264or5VideoStreamParser(hNumber, this, inputSource, includeStartCodeInOutput)
                 : NULL;
-  fFrameRate = 12.5; // We assume a frame rate of 30 fps, unless we learn otherwise (from parsing a VPS or SPS NAL unit)
+  if(g_set_framerate) {
+    fFrameRate = g_set_framerate;
+  }else{
+    fFrameRate = 12; // We assume a frame rate of 30 fps, unless we learn otherwise (from parsing a VPS or SPS NAL unit)
+  }
 
 }
 
@@ -227,6 +232,9 @@ H264or5VideoStreamParser ::H264or5VideoStreamParser(int hNumber, H264or5VideoStr
       CpbDpbDelaysPresentFlag(0), pic_struct_present_flag(0),
       DeltaTfiDivisor(hNumber == 264 ? 2.0 : 1.0),NeedInsertSei(False),FrameCountInVideo(0)
 {
+  if(g_set_framerate) {
+    fParsedFrameRate = g_set_framerate;
+  }
 }
 
 H264or5VideoStreamParser::~H264or5VideoStreamParser()
@@ -1241,11 +1249,13 @@ unsigned H264or5VideoStreamParser::parse()
     else
     {
       u_int32_t next4Bytes = test4Bytes();
-      // if(next4Bytes == 0x00000001){
-      //   setParseState(); // ensures forward progress
-      //   skipBytes(4); // skip this initial code
-      //   next4Bytes = test4Bytes();
-      // }
+#ifdef _DOUBLE_START_CODE_
+      if(next4Bytes == 0x00000001){
+        setParseState(); // ensures forward progress
+        skipBytes(4); // skip this initial code
+        next4Bytes = test4Bytes();
+      }
+#endif
       if (!fHaveSeenFirstByteOfNALUnit)
       {
         fFirstByteOfNALUnit = next4Bytes >> 24;

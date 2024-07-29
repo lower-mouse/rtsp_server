@@ -90,10 +90,10 @@ int main(int argc, char** argv) {
   // If you choose to continue the application past this point (i.e., if you comment out the "return 0;" statement above),
   // and if you don't intend to do anything more with the "TaskScheduler" and "UsageEnvironment" objects,
   // then you can also reclaim the (small) memory used by these objects by uncommenting the following code:
-  /*
+  
     env->reclaim(); env = NULL;
     delete scheduler; scheduler = NULL;
-  */
+  
 }
 
 // Define a class to hold per-stream state that we maintain throughout each stream's lifetime:

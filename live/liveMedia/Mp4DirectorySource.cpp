@@ -162,10 +162,11 @@ void Mp4DirectorySource::doGetNextFrame() {
   if(!need_open){
       // switch file
       if(fVideoIterator == fVideos.end()){
+          fVideoIterator = fVideos.begin();
           printf("fVideoIterator in end\n");
-          exit(0);
+          exit(0); // 注释该行，则循环播放
           // handleClosure();
-          return;
+          // return;
       }
 
       printf("open video file:%s\n", fVideoIterator->second.c_str());
@@ -225,7 +226,7 @@ void Mp4DirectorySource::doReadFromDirectory() {
       break;
     }else if(frame.type == Ifai::Ifmp4::FrameType::gpsInfo){
       std::string gps_info(reinterpret_cast<char *>(frame.frame_data), frame.frame_data_len);
-      printf("gps_info:%s\n", gps_info.c_str());
+      // printf("gps_info:%s\n", gps_info.c_str());
       packetSei(gps_info);
     }
   }
@@ -239,7 +240,7 @@ void Mp4DirectorySource::doReadFromDirectory() {
 }
 
 void Mp4DirectorySource::saveData(const void *src, size_t __n){
-  unsigned int write_len = __n;
+  size_t write_len = __n;
   if(fWriteLen + __n > fMaxSize){
     write_len = fMaxSize - fWriteLen;
   }
@@ -248,7 +249,6 @@ void Mp4DirectorySource::saveData(const void *src, size_t __n){
   memcpy(fTo + fWriteLen, src, write_len);
   // fwrite(src, 1, write_len, fFid);
   fWriteLen += write_len;
-  // printf("fNumTruncatedByte:%u\n", fNumTruncatedBytes);
 }
 
 unsigned Mp4DirectorySource::maxFrameSize() const{
